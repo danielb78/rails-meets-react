@@ -5,13 +5,15 @@ class CreateNewMeetupForm extends React.Component {
         this.state = {
             meetup: {
                 title: '',
-                description: ''
+                description: '',
+                date: new Date(),
             }
         };
 
         this.titleChanged = this.titleChanged.bind(this);
         this.descriptionChanged = this.descriptionChanged.bind(this);
         this.formSubmitted = this.formSubmitted.bind(this);
+        this.dateChanged = this.dateChanged.bind(this);
     }
 
     titleChanged(event) {
@@ -26,15 +28,27 @@ class CreateNewMeetupForm extends React.Component {
 
     formSubmitted(event) {
         event.preventDefault();
+        const meetup = this.state.meetup;
 
         $.ajax({
             url: '/meetups.json',
             type: 'POST',
-            // dataType: 'JSON',
+            dataType: 'JSON',
             contentType: 'application/json',
             processData: false,
-            data: JSON.stringify({meetup: this.state.meetup})
+            data: JSON.stringify({
+                meetup: {
+                    title: meetup.title,
+                    description: meetup.description,
+                    date: `${meetup.date.getFullYear()}-${meetup.date.getMonth() + 1}-${meetup.date.getDate()}`
+                }
+            })
         });
+    }
+
+    dateChanged(newDate) {
+        this.state.meetup.date = newDate;
+        this.forceUpdate();
     }
 
     render() {
@@ -58,6 +72,10 @@ class CreateNewMeetupForm extends React.Component {
                     placeholder="Meetup description"
                     labelText="Description"
                     elementType="textarea"
+                />
+                <DateWithLabel
+                    onChange={this.dateChanged}
+                    date={this.state.meetup.date}
                 />
                 <div className="col-lg-10 col-lg-offset-2">
                     <button className="btn-btn-primary" type="submit">Save</button>
