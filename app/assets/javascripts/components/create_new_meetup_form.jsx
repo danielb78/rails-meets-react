@@ -7,6 +7,7 @@ class CreateNewMeetupForm extends React.Component {
                 title: '',
                 description: '',
                 date: new Date(),
+                seoText: null
             }
         };
 
@@ -14,6 +15,7 @@ class CreateNewMeetupForm extends React.Component {
         this.descriptionChanged = this.descriptionChanged.bind(this);
         this.formSubmitted = this.formSubmitted.bind(this);
         this.dateChanged = this.dateChanged.bind(this);
+        this.seoChanged = this.seoChanged.bind(this);
     }
 
     titleChanged(event) {
@@ -40,6 +42,7 @@ class CreateNewMeetupForm extends React.Component {
                 meetup: {
                     title: meetup.title,
                     description: meetup.description,
+                    seo: meetup.seoText || this.computeDefaultSeoText(),
                     date: `${meetup.date.getFullYear()}-${meetup.date.getMonth() + 1}-${meetup.date.getDate()}`
                 }
             })
@@ -51,7 +54,27 @@ class CreateNewMeetupForm extends React.Component {
         this.forceUpdate();
     }
 
+    seoChanged(seoText) {
+        this.state.meetup.seoText = seoText;
+        this.forceUpdate();
+    }
+
+    computeDefaultSeoText() {
+        const words = this.state.meetup.title.toLowerCase().split(/\s+/);
+
+        words.push(monthName(this.state.meetup.date.getMonth()));
+        words.push(this.state.meetup.date.getFullYear().toString());
+
+        return words.filter(
+            (string) => string.trim().length > 0
+        ).join('-').toLowerCase();
+    }
+
     render() {
+        const btnStyle = {
+            paddingLeft: '5px'
+        };
+
         return (<form
             className="form-horizontal"
             onSubmit={this.formSubmitted}
@@ -77,8 +100,15 @@ class CreateNewMeetupForm extends React.Component {
                     onChange={this.dateChanged}
                     date={this.state.meetup.date}
                 />
-                <div className="col-lg-10 col-lg-offset-2">
-                    <button className="btn-btn-primary" type="submit">Save</button>
+                <FormInputWithLabelAndReset
+                    id={this.seo}
+                    value={this.state.meetup.seoText ? this.state.meetup.seoText : this.computeDefaultSeoText()}
+                    onChange={this.seoChanged}
+                    placeholder="SEO text"
+                    labelText="seo"
+                />
+                <div className="col-lg-10 col-lg-offset-2" style={btnStyle}>
+                    <button className="btn btn-default" type="submit">Save</button>
                 </div>
             </fieldset>
         </form>);
